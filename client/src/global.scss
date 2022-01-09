@@ -1,0 +1,14 @@
+$darkGreen: #44514a;
+$green: #797d61;
+$lightGreen: #b6ba94;
+$brown: #7a5a41;
+$cream: #f4e8e0;
+$lightBrown: #b99482;
+
+$width: 768px;
+
+@mixin desktop {
+    @media (min-width: #{$width}) {
+        @content
+    }
+}

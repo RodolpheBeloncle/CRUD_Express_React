@@ -1,0 +1,14 @@
+.Home {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Home p {
+  width: 80%;
+}
+
+.Home img {
+  width: 100%;
+}
