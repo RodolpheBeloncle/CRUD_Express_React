@@ -1,10 +1,9 @@
 const articleRouter = require('express').Router();
 const article = require('../models/articleModel');
-const checkTokenAuth = require('../middlewares/checkTokenAuth');
+const isAuthorized = require('../middlewares/isAuthorized');
 
 // Api CRUD routes for Blog
-articleRouter.get('/',async (req, res) => {
-  
+articleRouter.get('/', async (req, res) => {
   article.findAllArticles().then(([articles]) => {
     res.json(articles);
   });
@@ -19,11 +18,12 @@ articleRouter.get('/:id', async (req, res) => {
   }
 });
 
-articleRouter.post('/', checkTokenAuth, async (req, res) => {
+articleRouter.post('/', isAuthorized, async (req, res) => {
   console.log('admin_id', res.locals);
   const adminId = res.locals;
+  console.log("admin_id",adminId);
 
-  const [{ insertId: id }] = await article.insertArticle(req.body, adminId);
+  const [{ insertId: id }] = await article.insertArticle(req.body,adminId);
   const newArticle = req.body;
   res.status(201).json({
     id,
@@ -31,14 +31,15 @@ articleRouter.post('/', checkTokenAuth, async (req, res) => {
   });
 });
 
-articleRouter.delete('/:id',checkTokenAuth, async (req, res) => {
+articleRouter.delete('/:id', isAuthorized, async (req, res) => {
   await article.deleteArticle(req.params.id);
   res.status(204).json();
 });
 
-articleRouter.put('/:id',checkTokenAuth, async (req, res) => {
+articleRouter.put('/:id', isAuthorized, async (req, res) => {
   await article.updateArticle(req.body, req.params.id);
   res.status(204).json();
 });
 
 module.exports = articleRouter;
+
