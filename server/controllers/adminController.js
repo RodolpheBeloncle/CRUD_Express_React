@@ -12,23 +12,24 @@ const adminSchema = Joi.object({
 
 const PRIVATE_KEY = process.env.SECRET_TOKEN;
 
-const generateJwt = (email) =>
-  jwt.sign(
-    {
-      email,
-    },
-    PRIVATE_KEY
-  );
-
 const adminLogin = async (req, res) => {
-  // verifier les données du formulaire
-  const { value, error } = adminSchema.validate(req.body);
+  // // verifier les données du formulaire
+  const {error} = adminSchema.validate(req.body);
   if (error) {
     return res.status(400).json(error);
   }
 
+  // Pas d'information à traiter
+  if (error) {
+    return res
+      .status(400)
+      .json({
+        message: 'Error. Please enter the correct username and password',
+      });
+  }
+
   // verifier si l'utilisateur existe
-  const [[existingAdmin]] = await findByEmail(value.email);
+  const [[existingAdmin]] = await findByEmail(req.body.email);
 
   if (!existingAdmin) {
     return res.status(403).json({
@@ -37,7 +38,10 @@ const adminLogin = async (req, res) => {
   }
 
   // si c'est le cas, on vérifie son password
-  const verified = await argon2.verify(existingAdmin.password, value.password);
+  const verified = await argon2.verify(
+    existingAdmin.password,
+    req.body.password
+  );
 
   if (!verified) {
     return res.status(403).json({
@@ -45,12 +49,15 @@ const adminLogin = async (req, res) => {
     });
   }
 
-  // si son password est bon, on lui donne un JWT
-  const jwtKey = generateJwt(value.email);
+  const token = jwt.sign(
+    {
+      id: existingAdmin.id,
+      username: existingAdmin.lastname,
+    },
+    PRIVATE_KEY
+  );
 
-  return res.json({
-    credential: jwtKey,
-  });
+  return res.json({ credential: token });
 };
 
 module.exports = {
